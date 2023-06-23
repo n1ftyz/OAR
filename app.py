@@ -119,24 +119,22 @@ def pagecontent(pathname):
                 html.Div(
                     dcc.Graph(id='bar'),
                     style={'width': '100%', 'display': 'inline-block'}),
-                 html.Div(
-                    dcc.Graph(id='mapbox'),
-                    style={'width': '100%', 'display': 'inline-block'}),
                 ])
-        ], fluid=True) #РАСТЯГИВАНИЕ НА ВЕСЬ ЭКРАН
+        ], fluid=True)
 
     elif pathname == "/page2":
         return dmc.Container([
             html.Div([
                 html.Div([
-                    html.H1("Вакансии дизайнеров"),
+                    html.H1("На карте мира представлены города, которые указаны работодателями в вакансиях"),
                     html.P(
-                        "Данные о вакансиях дизайн-индустрии."
-                        " Используйте фильтры, чтобы увидеть результат."
+                        "Все города, которые есть в вакансиях отмечены точками. "
+                        "Карту можно приближать или отдалять. Для того, чтобы определить город, достаточно навестись на точку, после чего будут показаны географические координаты города и его название."
                     )
                 ], style={
                     'backgroundColor': 'rgb(255, 223, 222)',
-                    'padding': '10px 5px'
+                    'padding': '10px 5px',
+                    'text-align' : 'center'
                 }),
                     html.Div([
                     html.Label('Профессии'),
@@ -170,7 +168,7 @@ def update_pie(name):
 )
 def update_pie2(name):
     filtered_data = df[(df['area_name'].isin(name))]
-    fig = px.pie(filtered_data, values=filtered_data.groupby('area_name')['area_name'].count(), names=filtered_data['area_name'].unique(), hole=.0, color_discrete_sequence=px.colors.sequential.Burg, title="Количество вакансий по выбранной профессии")
+    fig = px.pie(filtered_data, values=filtered_data.groupby('area_name')['area_name'].count(), names=filtered_data['area_name'].unique(), hole=.0, color_discrete_sequence=px.colors.sequential.Burg, title="Города, наиболее встречающиеся в вакансиях")
     return fig
 
 
@@ -194,7 +192,7 @@ def update_scatter(name):
 def update_bar(name):
     fig = px.bar(df,
             x=df['employer_name'].unique(),
-            y=df.groupby('employer_name')['employer_name'].count(), labels = {'x': 'Компания','y': 'Кол-во вакансий'}, color_discrete_sequence=px.colors.sequential.Burg, title="Компании с количеством выбранных вакансий")
+            y=df.groupby('employer_name')['employer_name'].count(), labels = {'x': 'Компания','y': 'Кол-во вакансий'}, color_discrete_sequence=px.colors.sequential.Burg, title="Наиболее часто встречающиеся работодатели по числу опубликованных вакансий")
     return fig
 
 @callback(
@@ -203,7 +201,7 @@ Input ('name','value'),
 )
 def update_map(name):
     df_fil = pd.merge(df, df_cities, left_on=['area_name'], right_on=['Город'], how='inner')
-    fig = px.scatter_mapbox(df_fil, lat=df_fil['Широта'].unique(), lon=df_fil['Долгота'].unique(), hover_name=df_fil['area_name'].unique())
+    fig = px.scatter_mapbox(df_fil, lat=df_fil['Широта'].unique(), lon=df_fil['Долгота'].unique(), hover_name=df_fil['area_name'].unique(), zoom=1)
     fig.update_layout(mapbox_style="open-street-map")
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     return fig
